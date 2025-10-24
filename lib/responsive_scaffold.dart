@@ -12,7 +12,9 @@ class ResponsiveScaffold extends StatelessWidget {
     this.isUserAuthenticated,
     this.panelColor,
     this.leftPanel,
+    this.alwaysShowAppbar = false,
   });
+  final bool alwaysShowAppbar;
   final Widget body;
   final Widget? rightPanel, leftPanel;
   final Widget? floatingActionButton;
@@ -49,6 +51,7 @@ class ResponsiveScaffold extends StatelessWidget {
       );
     }
     return Scaffold(
+      appBar: alwaysShowAppbar ? appBar : null,
       floatingActionButton: isTablet ? floatingActionButton : null,
       body: Row(
         children: [
