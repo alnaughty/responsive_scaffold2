@@ -1,7 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:responsive_scaffold/src/responsive.dart';
 
-class ResponsiveScaffold extends StatelessWidget {
+class ResponsiveScaffoldController {
+  _ResponsiveScaffoldState? _state;
+
+  void _attach(_ResponsiveScaffoldState state) => _state = state;
+  void _detach() => _state = null;
+
+  void toggleEndDrawer() {
+    final scaffold = _state?._scaffoldKey.currentState;
+    if (scaffold == null) return;
+    if (scaffold.isEndDrawerOpen) {
+      scaffold.closeEndDrawer();
+    } else {
+      scaffold.openEndDrawer();
+    }
+  }
+
+  void toggleDrawer() {
+    final scaffold = _state?._scaffoldKey.currentState;
+    if (scaffold == null) return;
+    if (scaffold.isDrawerOpen) {
+      scaffold.closeDrawer();
+    } else {
+      scaffold.openDrawer();
+    }
+  }
+
+  void closeEndDrawer() {
+    _state?._scaffoldKey.currentState?.closeEndDrawer();
+  }
+
+  void openEndDrawer() {
+    _state?._scaffoldKey.currentState?.openEndDrawer();
+  }
+
+  void openDrawer() {
+    _state?._scaffoldKey.currentState?.openDrawer();
+  }
+
+  void closeDrawer() {
+    _state?._scaffoldKey.currentState?.closeDrawer();
+  }
+}
+
+class ResponsiveScaffold extends StatefulWidget {
   const ResponsiveScaffold({
     super.key,
     required this.body,
@@ -12,8 +55,10 @@ class ResponsiveScaffold extends StatelessWidget {
     this.isUserAuthenticated,
     this.panelColor,
     this.leftPanel,
+    this.controller,
     this.alwaysShowAppbar = false,
   });
+
   final bool alwaysShowAppbar;
   final Widget body;
   final Widget? rightPanel, leftPanel;
@@ -23,6 +68,27 @@ class ResponsiveScaffold extends StatelessWidget {
   final bool Function()? isUserAuthenticated;
   final Color? panelColor;
   final Duration panelAnimationDuration = const Duration(milliseconds: 600);
+  final ResponsiveScaffoldController? controller;
+
+  @override
+  State<ResponsiveScaffold> createState() => _ResponsiveScaffoldState();
+}
+
+class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  @override
+  void initState() {
+    super.initState();
+    widget.controller?._attach(this);
+  }
+
+  @override
+  void dispose() {
+    widget.controller?._detach();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool isDesktop = Responsive.isDesktop(context);
@@ -30,29 +96,47 @@ class ResponsiveScaffold extends StatelessWidget {
     final bool isTablet = Responsive.isTablet(context);
     final Size size = MediaQuery.sizeOf(context);
 
-    final bool hasUser = isUserAuthenticated?.call() ?? true;
+    final bool hasUser = widget.isUserAuthenticated?.call() ?? true;
     if (!hasUser) {
-      return unauthenticatedView ??
+      return widget.unauthenticatedView ??
           const Scaffold(
             body: Center(child: Text("Please sign in to continue")),
           );
     }
+
     if (isMobile) {
       return Scaffold(
-        appBar: appBar,
-        drawer: leftPanel == null
+        key: _scaffoldKey,
+        appBar: widget.appBar,
+        drawer: widget.leftPanel == null
             ? null
-            : Drawer(shape: const BeveledRectangleBorder(), child: leftPanel),
-        endDrawer: rightPanel == null
+            : Drawer(
+                shape: const BeveledRectangleBorder(),
+                child: widget.leftPanel,
+              ),
+        endDrawer: widget.rightPanel == null
             ? null
-            : Drawer(shape: const BeveledRectangleBorder(), child: rightPanel),
-        body: body,
-        floatingActionButton: floatingActionButton,
+            : Drawer(
+                shape: const BeveledRectangleBorder(),
+                child: widget.rightPanel,
+              ),
+        body: widget.body,
+        floatingActionButton: widget.floatingActionButton,
       );
     }
+
     return Scaffold(
-      appBar: alwaysShowAppbar ? appBar : null,
-      floatingActionButton: isTablet ? floatingActionButton : null,
+      key: _scaffoldKey,
+      endDrawer: isTablet
+          ? widget.rightPanel == null
+                ? null
+                : Drawer(
+                    shape: const BeveledRectangleBorder(),
+                    child: widget.rightPanel,
+                  )
+          : null,
+      appBar: widget.alwaysShowAppbar ? widget.appBar : null,
+      floatingActionButton: isTablet ? widget.floatingActionButton : null,
       body: Row(
         children: [
           AnimatedContainer(
@@ -60,22 +144,20 @@ class ResponsiveScaffold extends StatelessWidget {
             width: isDesktop
                 ? (size.width * 0.2).clamp(200, 300)
                 : kToolbarHeight + 15,
-            color: panelColor,
-            duration: panelAnimationDuration,
+            color: widget.panelColor,
+            duration: widget.panelAnimationDuration,
             curve: Curves.easeInOutCubic,
-            child: leftPanel,
+            child: widget.leftPanel,
           ),
-
-          Expanded(child: body),
-
-          if (rightPanel != null)
+          Expanded(child: widget.body),
+          if (widget.rightPanel != null)
             AnimatedContainer(
               height: size.height,
               width: isDesktop ? (size.width * 0.2).clamp(200, 300) : 0,
-              color: panelColor,
-              duration: panelAnimationDuration,
+              color: widget.panelColor,
+              duration: widget.panelAnimationDuration,
               curve: Curves.easeInOutCubic,
-              child: rightPanel,
+              child: widget.rightPanel,
             ),
         ],
       ),
