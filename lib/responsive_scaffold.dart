@@ -127,11 +127,14 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
                 !_scaffoldKey.currentState!.isEndDrawerOpen) ...{
               Positioned(
                 right: 0,
-                top: kToolbarHeight + 50,
+                top: kToolbarHeight,
                 child: SizedBox(
                   width: 20,
-                  height: 200,
+                  height: 150,
                   child: MaterialButton(
+                    height: 150,
+                    shape: BeveledRectangleBorder(),
+                    color: widget.panelColor,
                     onPressed: () {
                       if (_scaffoldKey.currentState!.isEndDrawerOpen) {
                         _scaffoldKey.currentState!.closeEndDrawer();
