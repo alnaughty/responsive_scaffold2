@@ -120,7 +120,34 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
                 shape: const BeveledRectangleBorder(),
                 child: widget.rightPanel,
               ),
-        body: widget.body,
+        body: Stack(
+          children: [
+            Positioned.fill(child: widget.body),
+            if (widget.rightPanel != null &&
+                !_scaffoldKey.currentState!.isEndDrawerOpen) ...{
+              Positioned(
+                right: 0,
+                top: kToolbarHeight + 50,
+                child: SizedBox(
+                  width: 20,
+                  height: 200,
+                  child: MaterialButton(
+                    onPressed: () {
+                      if (_scaffoldKey.currentState!.isEndDrawerOpen) {
+                        _scaffoldKey.currentState!.closeEndDrawer();
+                      } else {
+                        _scaffoldKey.currentState!.openEndDrawer();
+                      }
+                    },
+                    child: Center(
+                      child: Icon(Icons.chevron_left_outlined, size: 15),
+                    ),
+                  ),
+                ),
+              ),
+            },
+          ],
+        ),
         floatingActionButton: widget.floatingActionButton,
       );
     }
