@@ -124,7 +124,8 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
           children: [
             Positioned.fill(child: widget.body),
             if (widget.rightPanel != null &&
-                !_scaffoldKey.currentState!.isEndDrawerOpen) ...{
+                (_scaffoldKey.currentState != null &&
+                    !_scaffoldKey.currentState!.isEndDrawerOpen)) ...{
               Positioned(
                 right: 0,
                 top: kToolbarHeight,
@@ -157,38 +158,70 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
 
     return Scaffold(
       key: _scaffoldKey,
-      endDrawer: isTablet
-          ? widget.rightPanel == null
-                ? null
-                : Drawer(
-                    shape: const BeveledRectangleBorder(),
-                    child: widget.rightPanel,
-                  )
+      endDrawer: isTablet && widget.rightPanel != null
+          ? Drawer(
+              shape: const BeveledRectangleBorder(),
+              child: widget.rightPanel,
+            )
           : null,
       appBar: widget.alwaysShowAppbar ? widget.appBar : null,
       floatingActionButton: isTablet ? widget.floatingActionButton : null,
-      body: Row(
+      body: Stack(
         children: [
-          AnimatedContainer(
-            height: size.height,
-            width: isDesktop
-                ? (size.width * 0.2).clamp(200, 300)
-                : kToolbarHeight + 15,
-            color: widget.panelColor,
-            duration: widget.panelAnimationDuration,
-            curve: Curves.easeInOutCubic,
-            child: widget.leftPanel,
-          ),
-          Expanded(child: widget.body),
-          if (widget.rightPanel != null)
-            AnimatedContainer(
-              height: size.height,
-              width: isDesktop ? (size.width * 0.2).clamp(200, 300) : 0,
-              color: widget.panelColor,
-              duration: widget.panelAnimationDuration,
-              curve: Curves.easeInOutCubic,
-              child: widget.rightPanel,
+          Positioned.fill(
+            child: Row(
+              children: [
+                AnimatedContainer(
+                  height: size.height,
+                  width: isDesktop
+                      ? (size.width * 0.2).clamp(200, 300)
+                      : kToolbarHeight + 15,
+                  color: widget.panelColor,
+                  duration: widget.panelAnimationDuration,
+                  curve: Curves.easeInOutCubic,
+                  child: widget.leftPanel,
+                ),
+                Expanded(child: widget.body),
+                if (widget.rightPanel != null)
+                  AnimatedContainer(
+                    height: size.height,
+                    width: isDesktop ? (size.width * 0.2).clamp(200, 300) : 0,
+                    color: widget.panelColor,
+                    duration: widget.panelAnimationDuration,
+                    curve: Curves.easeInOutCubic,
+                    child: widget.rightPanel,
+                  ),
+              ],
             ),
+          ),
+          if (isTablet &&
+              widget.rightPanel != null &&
+              (_scaffoldKey.currentState != null &&
+                  !_scaffoldKey.currentState!.isEndDrawerOpen)) ...{
+            Positioned(
+              right: 0,
+              top: kToolbarHeight,
+              child: SizedBox(
+                width: 20,
+                height: 150,
+                child: MaterialButton(
+                  height: 150,
+                  shape: BeveledRectangleBorder(),
+                  color: widget.panelColor,
+                  onPressed: () {
+                    if (_scaffoldKey.currentState!.isEndDrawerOpen) {
+                      _scaffoldKey.currentState!.closeEndDrawer();
+                    } else {
+                      _scaffoldKey.currentState!.openEndDrawer();
+                    }
+                  },
+                  child: Center(
+                    child: Icon(Icons.chevron_left_outlined, size: 15),
+                  ),
+                ),
+              ),
+            ),
+          },
         ],
       ),
     );
