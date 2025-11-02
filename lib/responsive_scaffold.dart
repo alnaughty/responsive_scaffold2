@@ -231,33 +231,54 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
               ],
             ),
           ),
-          if (isTablet &&
-              widget.rightPanel != null &&
-              (_scaffoldKey.currentState != null &&
-                  !_scaffoldKey.currentState!.isEndDrawerOpen)) ...{
-            Positioned(
-              right: 0,
-              top: kToolbarHeight,
-              child: SizedBox(
-                width: 20,
-                height: 150,
-                child: MaterialButton(
-                  height: 150,
-                  shape: BeveledRectangleBorder(),
-                  color: widget.panelColor,
-                  onPressed: () {
-                    if (_scaffoldKey.currentState!.isEndDrawerOpen) {
-                      _scaffoldKey.currentState!.closeEndDrawer();
-                    } else {
-                      _scaffoldKey.currentState!.openEndDrawer();
-                    }
-                  },
-                  child: Center(
-                    child: Icon(Icons.chevron_left_outlined, size: 15),
+          if (isTablet && widget.rightPanel != null) ...{
+            ValueListenableBuilder<bool>(
+              valueListenable: _isEndDrawerOpen,
+              builder: (context, isOpen, _) {
+                if (isOpen) return const SizedBox.shrink();
+
+                return Positioned(
+                  right: 0,
+                  top: kToolbarHeight,
+                  child: SizedBox(
+                    width: 20,
+                    height: 150,
+                    child: MaterialButton(
+                      height: 150,
+                      shape: const BeveledRectangleBorder(),
+                      color: widget.panelColor ?? Theme.of(context).canvasColor,
+                      onPressed: _toggleEndDrawer,
+                      child: const Center(
+                        child: Icon(Icons.chevron_left_outlined, size: 15),
+                      ),
+                    ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
+            // Positioned(
+            //   right: 0,
+            //   top: kToolbarHeight,
+            //   child: SizedBox(
+            //     width: 20,
+            //     height: 150,
+            //     child: MaterialButton(
+            //       height: 150,
+            //       shape: BeveledRectangleBorder(),
+            //       color: widget.panelColor,
+            //       onPressed: () {
+            //         if (_scaffoldKey.currentState!.isEndDrawerOpen) {
+            //           _scaffoldKey.currentState!.closeEndDrawer();
+            //         } else {
+            //           _scaffoldKey.currentState!.openEndDrawer();
+            //         }
+            //       },
+            //       child: Center(
+            //         child: Icon(Icons.chevron_left_outlined, size: 15),
+            //       ),
+            //     ),
+            //   ),
+            // ),
           },
         ],
       ),
