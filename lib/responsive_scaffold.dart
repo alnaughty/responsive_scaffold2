@@ -76,6 +76,19 @@ class ResponsiveScaffold extends StatefulWidget {
 
 class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final ValueNotifier<bool> _isEndDrawerOpen = ValueNotifier(false);
+  void _toggleEndDrawer() {
+    // (_scaffoldKey.currentState != null &&
+    //     !_scaffoldKey.currentState!.isEndDrawerOpen);
+    // If open, close. If closed, open.
+    if (_scaffoldKey.currentState?.isEndDrawerOpen ?? false) {
+      _scaffoldKey.currentState?.closeEndDrawer();
+      // onEndDrawerChanged will flip the notifier; we don't need to set it here
+    } else {
+      _scaffoldKey.currentState?.openEndDrawer();
+      // onEndDrawerChanged will flip the notifier
+    }
+  }
 
   @override
   void initState() {
@@ -85,6 +98,7 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
 
   @override
   void dispose() {
+    _isEndDrawerOpen.dispose();
     widget.controller?._detach();
     super.dispose();
   }
@@ -123,32 +137,55 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
         body: Stack(
           children: [
             Positioned.fill(child: widget.body),
-            if (widget.rightPanel != null &&
-                (_scaffoldKey.currentState != null &&
-                    !_scaffoldKey.currentState!.isEndDrawerOpen)) ...{
-              Positioned(
-                right: 0,
-                top: kToolbarHeight,
-                child: SizedBox(
-                  width: 20,
-                  height: 150,
-                  child: MaterialButton(
-                    height: 150,
-                    shape: BeveledRectangleBorder(),
-                    color: widget.panelColor,
-                    onPressed: () {
-                      if (_scaffoldKey.currentState!.isEndDrawerOpen) {
-                        _scaffoldKey.currentState!.closeEndDrawer();
-                      } else {
-                        _scaffoldKey.currentState!.openEndDrawer();
-                      }
-                    },
-                    child: Center(
-                      child: Icon(Icons.chevron_left_outlined, size: 15),
+            if (widget.rightPanel != null) ...{
+              ValueListenableBuilder<bool>(
+                valueListenable: _isEndDrawerOpen,
+                builder: (context, isOpen, _) {
+                  if (isOpen) return const SizedBox.shrink();
+
+                  return Positioned(
+                    right: 0,
+                    top: kToolbarHeight,
+                    child: SizedBox(
+                      width: 20,
+                      height: 150,
+                      child: MaterialButton(
+                        height: 150,
+                        shape: const BeveledRectangleBorder(),
+                        color:
+                            widget.panelColor ?? Theme.of(context).canvasColor,
+                        onPressed: _toggleEndDrawer,
+                        child: const Center(
+                          child: Icon(Icons.chevron_left_outlined, size: 15),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                },
               ),
+              // Positioned(
+              //   right: 0,
+              //   top: kToolbarHeight,
+              //   child: SizedBox(
+              //     width: 20,
+              //     height: 150,
+              //     child: MaterialButton(
+              //       height: 150,
+              //       shape: BeveledRectangleBorder(),
+              //       color: widget.panelColor,
+              //       onPressed: () {
+              //         if (_scaffoldKey.currentState!.isEndDrawerOpen) {
+              //           _scaffoldKey.currentState!.closeEndDrawer();
+              //         } else {
+              //           _scaffoldKey.currentState!.openEndDrawer();
+              //         }
+              //       },
+              //       child: Center(
+              //         child: Icon(Icons.chevron_left_outlined, size: 15),
+              //       ),
+              //     ),
+              //   ),
+              // ),
             },
           ],
         ),
