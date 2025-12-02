@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:responsive_scaffold/src/responsive.dart';
+export 'package:responsive_scaffold/src/responsive.dart';
 
 class ResponsiveScaffoldController {
   _ResponsiveScaffoldState? _state;
